@@ -18,12 +18,12 @@ public:
 	AGameBoardBase();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint32 BoardLengthX;
+	uint8 BoardLengthX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint32 BoardLengthY;
+	uint8 BoardLengthY;
 
 	UPROPERTY(BlueprintReadOnly)
-	uint32 BoardIndex;
+	uint8 BoardIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AGameBoardElementBase> BoardElementClass;

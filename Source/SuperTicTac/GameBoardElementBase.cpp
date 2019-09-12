@@ -24,3 +24,12 @@ void AGameBoardElementBase::Tick(float DeltaTime)
 
 }
 
+void AGameBoardElementBase::SetNewElementState(EElementState NewState)
+{
+	if (NewState != ElementState)
+	{
+		ElementState = NewState;
+		OnNewElementState.Broadcast(this, ElementState);
+	}
+}
+

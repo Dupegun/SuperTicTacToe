@@ -23,6 +23,8 @@ void AGameBoardBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	FillBoardWithElements();
+
 }
 
 // Called every frame
@@ -34,20 +36,35 @@ void AGameBoardBase::Tick(float DeltaTime)
 
 void AGameBoardBase::FillBoardWithElements()
 {
-	if (IsValid(GetWorld()))
+	if (ensure(GetWorld()))
 	{
-		FVector StartCalcLoc = GetActorLocation() - FVector(BoardLengthX / 2.f, BoardLengthY / 2.f, 0.f)*BoardElementSize;
+		for (auto It = BoardElements.CreateConstIterator(); It; ++It)
+		{
+			if (IsValid((*It).Key))
+			{
+				auto Element = (*It).Key;
+				BoardElements.Remove((*It).Key);
+				if (IsValid(Element))
+				{
+					Element->Destroy();
+				}
+			}
+		}
+
+		FVector StartCalcLoc = GetActorLocation() - FVector(BoardLengthX, BoardLengthY, 0.f)*BoardElementSize/2;
 		for (int i = 0; i < BoardLengthX; i++)
+		{
 			for (int j = 0; j < BoardLengthY; j++)
 			{
-				FTransform SpawnTransform(StartCalcLoc + FVector(i*BoardLengthX, j*BoardLengthY, 0.f));
+				FTransform SpawnTransform(StartCalcLoc + FVector(i+0.5f, j+0.5f, 0.f)*BoardElementSize);
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.Owner = this;
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 				auto SpawnedElement = GetWorld()->SpawnActor<AGameBoardElementBase>(BoardElementClass, SpawnTransform, SpawnParams);
+				SpawnedElement->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 				BoardElements.Add(SpawnedElement, FIntVector(i, j, BoardIndex));
 			}
-	}
+		}
 	}
 }
 
