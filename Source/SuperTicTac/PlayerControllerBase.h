@@ -11,5 +11,8 @@ class SUPERTICTAC_API APlayerControllerBase : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(BlueprintReadWrite)
+	uint8 MyPlayerIndex;
 
 };

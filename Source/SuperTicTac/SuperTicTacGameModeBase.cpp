@@ -3,6 +3,7 @@
 #include "SuperTicTacGameModeBase.h"
 #include "GameBoardBase.h"
 #include "Engine/World.h"
+#include "TicTacGameStateBase.h"
 
 ASuperTicTacGameModeBase::ASuperTicTacGameModeBase() :
 	GameBoardElementSize(200.f),
@@ -38,7 +39,19 @@ void ASuperTicTacGameModeBase::CreateGameField()
 			auto NewGameBoard				= GetWorld()->SpawnActor<AGameBoardBase>(GameBoardClass, SpawnTransform, SpawnParams);
 			NewGameBoard->BoardElementSize	= GameBoardElementSize;
 			NewGameBoard->BoardIndex		= i;
-			NewGameBoard->FillBoardWithElements();
+			bool bSuccess = NewGameBoard->FillBoardWithElements();
+			if (bSuccess)
+			{
+				auto GameState = GetGameState<ATicTacGameStateBase>();
+				if (IsValid(GameState))
+				{
+					auto Elements = NewGameBoard->GetAllElements();
+					for (auto It = Elements.CreateConstIterator(); It; ++It)
+					{
+						(*It)->OnNewElementState.AddDynamic(GameState, &ATicTacGameStateBase::HandleNewElementState);
+					}
+				}
+			}
 			SpawnedGameBoards.Add(NewGameBoard, i);
 		}
 	}

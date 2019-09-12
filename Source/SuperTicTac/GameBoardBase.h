@@ -43,6 +43,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-	void FillBoardWithElements();
+	bool FillBoardWithElements();
+
+	UFUNCTION(BlueprintCallable)
+	TArray<AGameBoardElementBase*> GetAllElements() const;
 
 };

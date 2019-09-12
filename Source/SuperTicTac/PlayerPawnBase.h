@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "GameBoardElementBase.h"
 #include "PlayerPawnBase.generated.h"
 
 UCLASS()
@@ -15,6 +16,8 @@ public:
 	// Sets default values for this pawn's properties
 	APlayerPawnBase();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EElementState PlayerTurnElement;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

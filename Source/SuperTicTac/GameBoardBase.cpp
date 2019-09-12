@@ -34,7 +34,7 @@ void AGameBoardBase::Tick(float DeltaTime)
 
 }
 
-void AGameBoardBase::FillBoardWithElements()
+bool AGameBoardBase::FillBoardWithElements()
 {
 	if (ensure(GetWorld()))
 	{
@@ -65,6 +65,15 @@ void AGameBoardBase::FillBoardWithElements()
 				BoardElements.Add(SpawnedElement, FIntVector(i, j, BoardIndex));
 			}
 		}
+		return true;
 	}
+	return false;
+}
+
+TArray<AGameBoardElementBase*> AGameBoardBase::GetAllElements() const
+{
+	TArray<AGameBoardElementBase*> BoardElementsKeys;
+	BoardElements.GenerateKeyArray(BoardElementsKeys);
+	return BoardElementsKeys;
 }
 
