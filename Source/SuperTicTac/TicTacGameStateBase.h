@@ -13,12 +13,9 @@ class SUPERTICTAC_API ATicTacGameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
 	
-
 public:
-	UPROPERTY(BlueprintReadWrite)
-	uint8 CurrentTurnPlayerIndex;
+	AGameBoardElementBase* LastChangedElement;
 
-public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void StartMatch();
 
@@ -27,4 +24,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void HandleNewElementState(AGameBoardElementBase* BoardElement, EElementState NewElementState);
+
+	UFUNCTION()
+	void CheckWin();
+
+	UFUNCTION()
+	bool CheckPlane(FIntVector InitialPoint, FIntVector PlaneNormal, EElementState TargetState);
 };

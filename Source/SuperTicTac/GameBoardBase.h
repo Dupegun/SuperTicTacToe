@@ -32,7 +32,7 @@ public:
 	float BoardElementSize;
 
 	UPROPERTY(BlueprintReadOnly)
-	TMap<AGameBoardElementBase* , FIntVector> BoardElements;
+	TMap<FIntVector, AGameBoardElementBase*> BoardElements;
 
 protected:
 	// Called when the game starts or when spawned

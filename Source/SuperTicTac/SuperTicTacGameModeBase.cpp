@@ -4,10 +4,12 @@
 #include "GameBoardBase.h"
 #include "Engine/World.h"
 #include "TicTacGameStateBase.h"
+#include "GameBoardElementBase.h"
 
 ASuperTicTacGameModeBase::ASuperTicTacGameModeBase() :
 	GameBoardElementSize(200.f),
-	GameFieldSize(3,3,3)
+	GameFieldSize(3,3,3),
+	NumElementsToWin(3)
 {
 
 }
@@ -18,10 +20,10 @@ void ASuperTicTacGameModeBase::CreateGameField()
 	{
 		for (auto It = SpawnedGameBoards.CreateConstIterator(); It; ++It)
 		{
-			if (IsValid((*It).Key))
+			if (IsValid(It->Value))
 			{
-				auto Board = (*It).Key;
-				SpawnedGameBoards.Remove((*It).Key);
+				auto Board = It->Value;
+				SpawnedGameBoards.Remove(It->Key);
 				if (IsValid(Board))
 				{
 					Board->Destroy();
@@ -52,7 +54,54 @@ void ASuperTicTacGameModeBase::CreateGameField()
 					}
 				}
 			}
-			SpawnedGameBoards.Add(NewGameBoard, i);
+			SpawnedGameBoards.Add(i, NewGameBoard);
 		}
 	}
+}
+
+AGameBoardElementBase* ASuperTicTacGameModeBase::GetBoardElement(FIntVector Index) const
+{
+	auto GameBoard = *(SpawnedGameBoards.Find(Index.Z));
+	if (IsValid(GameBoard))
+	{
+		auto TargetValue = GameBoard->BoardElements.Find(Index);
+		if (TargetValue)
+		{
+			return *TargetValue;
+		}
+	}
+	return nullptr;
+}
+
+FIntVector ASuperTicTacGameModeBase::GetBoardElementIndex(class AGameBoardElementBase* BoardElement, uint8 &bIsSuccess) const
+{
+	for (auto It = SpawnedGameBoards.CreateConstIterator(); It; ++It)
+	{
+		auto CurrentBoard = It->Value;
+		if (IsValid(CurrentBoard))
+		{
+			auto TargetElementIndex = CurrentBoard->BoardElements.FindKey(BoardElement);
+			if (TargetElementIndex)
+			{
+				bIsSuccess = true;
+				return *TargetElementIndex;
+			}
+		}
+	}
+	bIsSuccess = false;
+	return FIntVector(-1, -1, -1);
+}
+
+TArray<AGameBoardElementBase*> ASuperTicTacGameModeBase::GetAllElements() const
+{
+	TArray<AGameBoardElementBase*> ResutArr;
+	for (auto It = SpawnedGameBoards.CreateConstIterator(); It; ++It)
+	{
+		if (IsValid(It->Value))
+		{
+			ResutArr.Append(It->Value->GetAllElements());
+		}
+	}
+	
+	return ResutArr;
 }

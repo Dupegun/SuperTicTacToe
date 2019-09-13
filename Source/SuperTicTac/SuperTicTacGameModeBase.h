@@ -25,9 +25,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FIntVector GameFieldSize;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	uint8 NumElementsToWin;
+
 	UPROPERTY(BlueprintReadOnly)
-	TMap<AGameBoardBase*, uint8> SpawnedGameBoards;
+	TMap<uint8, AGameBoardBase*> SpawnedGameBoards;
 
 	UFUNCTION(BlueprintCallable)
 	void CreateGameField();
+
+	UFUNCTION(BlueprintCallable)
+	class AGameBoardElementBase* GetBoardElement(FIntVector Index) const;
+	UFUNCTION(BlueprintCallable)
+	FIntVector GetBoardElementIndex(class AGameBoardElementBase* BoardElement, uint8 &bIsSuccess) const;
+	UFUNCTION(BlueprintCallable)
+	TArray<AGameBoardElementBase*> GetAllElements() const;
 };

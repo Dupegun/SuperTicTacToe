@@ -40,9 +40,9 @@ bool AGameBoardBase::FillBoardWithElements()
 	{
 		for (auto It = BoardElements.CreateConstIterator(); It; ++It)
 		{
-			if (IsValid((*It).Key))
+			if (IsValid((*It).Value))
 			{
-				auto Element = (*It).Key;
+				auto Element = (*It).Value;
 				BoardElements.Remove((*It).Key);
 				if (IsValid(Element))
 				{
@@ -62,7 +62,7 @@ bool AGameBoardBase::FillBoardWithElements()
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 				auto SpawnedElement = GetWorld()->SpawnActor<AGameBoardElementBase>(BoardElementClass, SpawnTransform, SpawnParams);
 				SpawnedElement->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-				BoardElements.Add(SpawnedElement, FIntVector(i, j, BoardIndex));
+				BoardElements.Add(FIntVector(i, j, BoardIndex), SpawnedElement);
 			}
 		}
 		return true;
@@ -73,7 +73,7 @@ bool AGameBoardBase::FillBoardWithElements()
 TArray<AGameBoardElementBase*> AGameBoardBase::GetAllElements() const
 {
 	TArray<AGameBoardElementBase*> BoardElementsKeys;
-	BoardElements.GenerateKeyArray(BoardElementsKeys);
+	BoardElements.GenerateValueArray(BoardElementsKeys);
 	return BoardElementsKeys;
 }
 

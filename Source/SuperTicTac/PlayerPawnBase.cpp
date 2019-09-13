@@ -4,7 +4,7 @@
 
 // Sets default values
 APlayerPawnBase::APlayerPawnBase() :
-	PlayerTurnElement(EElementState::ES_Cross)
+	PlayerTurnElement(EElementState::ES_None)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -30,5 +30,10 @@ void APlayerPawnBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void APlayerPawnBase::AllowToMakeTurnWith_Implementation(EElementState AllowedElement)
+{
+	PlayerTurnElement = AllowedElement;
 }
 
