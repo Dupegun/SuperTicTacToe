@@ -30,4 +30,7 @@ public:
 
 	UFUNCTION()
 	bool CheckPlane(FIntVector InitialPoint, FIntVector PlaneNormal, EElementState TargetState);
+
+	UFUNCTION()
+	bool CheckLine(EElementState TargetState, FIntVector InitialPoint, FIntVector DeltaVector);
 };

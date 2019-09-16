@@ -31,14 +31,25 @@ void ATicTacGameStateBase::CheckWin()
 			{
 				EElementState TargetState = LastChangedElement->ElementState;
 				uint8 bIsSuccess = false;
-				FIntVector ResultIndex = GameMode->GetBoardElementIndex(LastChangedElement, bIsSuccess);
+				FIntVector InIndex = GameMode->GetBoardElementIndex(LastChangedElement, bIsSuccess);
 				if (bIsSuccess)
 				{
-					uint8 bWasWin = CheckPlane(ResultIndex, FIntVector(0,0,1), TargetState);
+					FIntVector FieldSize = GameMode->GameFieldSize;
+
+					uint8 bWasWin = CheckLine(TargetState, FIntVector(InIndex.X - FieldSize.X, InIndex.Y, InIndex.Z), FIntVector(InIndex.X + FieldSize.X, InIndex.Y, InIndex.Z));
 					if (!bWasWin)
-						bWasWin = CheckPlane(ResultIndex, FIntVector(0,1,0), TargetState);
-					if (!bWasWin)
-						bWasWin = CheckPlane(ResultIndex, FIntVector(1,0,0), TargetState);
+					{
+						bWasWin = CheckLine(TargetState, FIntVector(InIndex.X, InIndex.Y - FieldSize.Y, InIndex.Z), FIntVector(InIndex.X, InIndex.Y - FieldSize.Y, InIndex.Z));
+					}
+					else if (!bWasWin)
+					{
+						bWasWin = CheckLine(TargetState, FIntVector(InIndex.X, InIndex.Y, InIndex.Z - FieldSize.Z), FIntVector(InIndex.X, InIndex.Y, InIndex.Z + FieldSize.Z));
+					}
+					else if (!bWasWin)
+					{
+						bWasWin = CheckLine(TargetState, FIntVector(InIndex.X - FieldSize.X, InIndex.Y - FieldSize.Y, InIndex.Z)
+					}
+
 
 					if (!bWasWin)
 					{
@@ -72,107 +83,76 @@ bool ATicTacGameStateBase::CheckPlane(FIntVector InitialPoint, FIntVector PlaneN
 		auto GameMode = Cast<ASuperTicTacGameModeBase>(GetWorld()->GetAuthGameMode());
 		if (IsValid(GameMode))
 		{
-			FIntVector FieldSize	= GameMode->GameFieldSize;
-			uint8 NumToWin			= GameMode->NumElementsToWin;
-			uint8 CurrentNumX		= 0;
-			uint8 CurrentNumY		= 0;
-			uint8 CurrentNumXY0		= 0;
-			uint8 CurrentNumXY1		= 0;
+			FIntVector FieldSize = GameMode->GameFieldSize;
+			uint8 NumToWin = GameMode->NumElementsToWin;
 
-			uint8 bUseX = PlaneNormal.X != 1;
-			uint8 bUseY = PlaneNormal.Y != 1;
-			uint8 bUseZ = PlaneNormal.Z != 1;
-
-			for (auto i = bUseX? InitialPoint.X - NumToWin : 0; i <= bUseX? InitialPoint.X + NumToWin : 0; i++)
+			//Z is normal for plane
+			if (PlaneNormal == FIntVector(0, 0, 1))
 			{
-				for (auto j = bUseY? InitialPoint.Y - NumToWin : 0; j <= bUseY? InitialPoint.Y + NumToWin : 0; j++)
+				for (int i = 0; i < FieldSize.X; i++)
 				{
-					for (auto k = bUseZ? InitialPoint.Z - NumToWin : 0; k <= bUseZ? InitialPoint.Z + NumToWin : 0; k++)
+					uint8 bIsWin = CheckLine(TargetState, FIntVector(i, 0, InitialPoint.Z), FIntVector(i, FieldSize.Y, InitialPoint.Z));
+					if (bIsWin)
 					{
-						if (i<0 || i>(FieldSize.X - 1) || j<0 || j>(FieldSize.Y - 1) || k<0 || k>(FieldSize.Z-1)) { continue; }
-
-						FIntVector IndexToCheck;
-						if (PlaneNormal.Z == 1)
-						{
-							IndexToCheck = FIntVector(i, j, PlaneNormal.Z);
-						}
-						else if (PlaneNormal.Y == 1)
-						{
-							IndexToCheck = FIntVector(i, PlaneNormal.Y, k);
-						}
-						else if (PlaneNormal.X == 1)
-						{
-							IndexToCheck = FIntVector(PlaneNormal.X, j, k);
-						}
-
-						auto BoardElement = GameMode->GetBoardElement(IndexToCheck);
-						if (IsValid(BoardElement))
-						{
-							uint8 bisEqual = TargetState == BoardElement->ElementState;
-							if (bisEqual)
-							{
-								CurrentNumY++;
-
-								if (IndexToCheck.X == IndexToCheck.Y || IndexToCheck.X == IndexToCheck.Z || IndexToCheck.Y == IndexToCheck.Z)
-								{
-									CurrentNumXY0++;
-								}
-								if (IndexToCheck.Z == 1 && i == (FieldSize.Y - 1 - j) ||
-									IndexToCheck.Y == 1 && i == (FieldSize.Z - 1 - k) ||
-									IndexToCheck.X == 1 && j == (FieldSize.X - 1 - k))
-								{
-									CurrentNumXY1++;
-								}
-							}
-						}
-
-						if (PlaneNormal.Z == 1)
-						{
-							IndexToCheck = FIntVector(j, i, PlaneNormal.Z); 
-						}
-						else if (PlaneNormal.Y == 1)
-						{
-							IndexToCheck = FIntVector(k, PlaneNormal.Y, i);
-						}
-						else if (PlaneNormal.X == 1)
-						{
-							IndexToCheck = FIntVector(PlaneNormal.X, k, j);
-						}
-
-						BoardElement = GameMode->GetBoardElement(IndexToCheck);
-						if (IsValid(BoardElement))
-						{
-							uint8 bisEqual = TargetState == BoardElement->ElementState;
-							if (bisEqual)
-							{
-								CurrentNumX++;
-							}
-						}
-
-						if (CurrentNumX == NumToWin || CurrentNumY == NumToWin || CurrentNumXY0 == NumToWin || CurrentNumXY1 == NumToWin)
-						{
-							UE_LOG(LogTemp, Warning, TEXT("Win!"));
-							return true;
-						}
+						return true;
 					}
-					//if (!bUseZ)
-					//{
-					//	CurrentNumX = 0;
-					//	CurrentNumY = 0;
-					//}
 				}
-				//if (!bUseY)
-				//{
-				//	CurrentNumX = 0;
-				//	CurrentNumY = 0;
-				//}
+				
+				for (int j = 0; j < FieldSize.Y; j++)
+				{
+					uint8 bIsWin = CheckLine(TargetState, FIntVector(0, j, InitialPoint.Z), FIntVector(FieldSize.X, j, InitialPoint.Z));
+					if (bIsWin)
+					{
+						return true;
+					}
+				}
 			}
-			//if (!bUseY)
-			//{
-			//	CurrentNumX = 0;
-			//	CurrentNumY = 0;
-			//}
 		}
 	}
 	return false;
+}
+
+bool ATicTacGameStateBase::CheckLine(EElementState TargetState, FIntVector InitialPoint, FIntVector DeltaVector)
+{
+	if (!IsValid(GetWorld())) { return false; }
+
+	auto GameMode = Cast<ASuperTicTacGameModeBase>(GetWorld()->GetAuthGameMode());
+	if (!IsValid(GameMode)) { return false; }
+
+	FIntVector FieldSize	= GameMode->GameFieldSize;
+	uint8 NumToWin			= GameMode->NumElementsToWin;
+	uint8 CurrentNum		= 0;
+
+	FIntVector LineStart	= InitialPoint - DeltaVector;
+	FIntVector LineEnd		= InitialPoint + DeltaVector;
+
+	for (int i = LineStart.X; i < LineEnd.X; i++)
+	{
+		for (int j = LineStart.Y; j < LineEnd.Y; j++)
+		{
+			for (int k = LineStart.Z; k < LineEnd.Z; k++)
+			{
+				auto Element = GameMode->GetBoardElement(FIntVector(i, j, k));
+				if (IsValid(Element))
+				{
+					uint8 StateSuccess = Element->ElementState == TargetState;
+					if (StateSuccess)
+					{
+						CurrentNum++;
+						if (CurrentNum == NumToWin)
+						{
+							return true;
+						}
+					}
+					else
+					{
+						CurrentNum = 0;
+					}
+				}
+			}
+		}
+	}
+
+	return false;
+
 }
