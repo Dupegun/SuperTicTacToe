@@ -3,6 +3,7 @@
 #include "TicTacGameStateBase.h"
 #include "Engine/World.h"
 #include "SuperTicTacGameModeBase.h"
+#include "HelpersFuncLib.h"
 
 void ATicTacGameStateBase::HandleNewElementState_Implementation(AGameBoardElementBase* BoardElement, EElementState NewElementState)
 {
@@ -29,6 +30,7 @@ void ATicTacGameStateBase::CheckWin()
 		{
 			if (IsValid(LastChangedElement))
 			{
+				uint8 NumToWin = GameMode->NumElementsToWin;
 				EElementState TargetState = LastChangedElement->ElementState;
 				uint8 bIsSuccess = false;
 				FIntVector InIndex = GameMode->GetBoardElementIndex(LastChangedElement, bIsSuccess);
@@ -36,18 +38,26 @@ void ATicTacGameStateBase::CheckWin()
 				{
 					FIntVector FieldSize = GameMode->GameFieldSize;
 
-					uint8 bWasWin = CheckLine(TargetState, FIntVector(InIndex.X - FieldSize.X, InIndex.Y, InIndex.Z), FIntVector(InIndex.X + FieldSize.X, InIndex.Y, InIndex.Z));
+					uint8 bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, 0, 0));
 					if (!bWasWin)
 					{
-						bWasWin = CheckLine(TargetState, FIntVector(InIndex.X, InIndex.Y - FieldSize.Y, InIndex.Z), FIntVector(InIndex.X, InIndex.Y - FieldSize.Y, InIndex.Z));
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(0, NumToWin, 0));
 					}
-					else if (!bWasWin)
+					if (!bWasWin)
 					{
-						bWasWin = CheckLine(TargetState, FIntVector(InIndex.X, InIndex.Y, InIndex.Z - FieldSize.Z), FIntVector(InIndex.X, InIndex.Y, InIndex.Z + FieldSize.Z));
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(0, 0, NumToWin));
 					}
-					else if (!bWasWin)
+					if (!bWasWin)
 					{
-						bWasWin = CheckLine(TargetState, FIntVector(InIndex.X - FieldSize.X, InIndex.Y - FieldSize.Y, InIndex.Z)
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, NumToWin, 0));
+					}
+					if (!bWasWin)
+					{
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, -NumToWin, 0));
+					}
+					if (!bWasWin)
+					{
+						//bWasWin = CheckLine(TargetState, InIndex, FIntVector());
 					}
 
 
@@ -69,6 +79,10 @@ void ATicTacGameStateBase::CheckWin()
 						{
 							UE_LOG(LogTemp, Warning, TEXT("Draw!"));
 						}
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Win!"));
 					}
 				}
 			}
@@ -123,14 +137,14 @@ bool ATicTacGameStateBase::CheckLine(EElementState TargetState, FIntVector Initi
 	uint8 NumToWin			= GameMode->NumElementsToWin;
 	uint8 CurrentNum		= 0;
 
-	FIntVector LineStart	= InitialPoint - DeltaVector;
-	FIntVector LineEnd		= InitialPoint + DeltaVector;
+	FIntVector LineStart	= UHelpersFuncLib::ClampVectorComponents(InitialPoint - DeltaVector, FIntVector(0,0,0), FieldSize-FIntVector(1,1,1));
+	FIntVector LineEnd		= UHelpersFuncLib::ClampVectorComponents(InitialPoint + DeltaVector, FIntVector(0,0,0), FieldSize-FIntVector(1,1,1));
 
-	for (int i = LineStart.X; i < LineEnd.X; i++)
+	for (int i = LineStart.X; i <= LineEnd.X; i++)
 	{
-		for (int j = LineStart.Y; j < LineEnd.Y; j++)
+		for (int j = LineStart.Y; j <= LineEnd.Y; j++)
 		{
-			for (int k = LineStart.Z; k < LineEnd.Z; k++)
+			for (int k = LineStart.Z; k <= LineEnd.Z; k++)
 			{
 				auto Element = GameMode->GetBoardElement(FIntVector(i, j, k));
 				if (IsValid(Element))
@@ -146,7 +160,7 @@ bool ATicTacGameStateBase::CheckLine(EElementState TargetState, FIntVector Initi
 					}
 					else
 					{
-						CurrentNum = 0;
+						//CurrentNum = 0;
 					}
 				}
 			}
