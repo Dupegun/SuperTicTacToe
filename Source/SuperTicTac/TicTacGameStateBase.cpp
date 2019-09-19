@@ -40,26 +40,30 @@ void ATicTacGameStateBase::CheckWin()
 
 					uint8 bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, 0, 0));
 					if (!bWasWin)
-					{
 						bWasWin = CheckLine(TargetState, InIndex, FIntVector(0, NumToWin, 0));
-					}
 					if (!bWasWin)
-					{
 						bWasWin = CheckLine(TargetState, InIndex, FIntVector(0, 0, NumToWin));
-					}
 					if (!bWasWin)
-					{
 						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, NumToWin, 0));
-					}
 					if (!bWasWin)
-					{
 						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, -NumToWin, 0));
-					}
 					if (!bWasWin)
-					{
-						//bWasWin = CheckLine(TargetState, InIndex, FIntVector());
-					}
-
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, NumToWin, -NumToWin));
+					if (!bWasWin)
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, NumToWin, NumToWin));
+					if (!bWasWin)
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, -NumToWin, NumToWin));
+					if (!bWasWin)
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, -NumToWin, -NumToWin));
+					if (!bWasWin)
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, 0, NumToWin));
+					if (!bWasWin)
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(NumToWin, 0, -NumToWin));
+					if (!bWasWin)
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(0, NumToWin, NumToWin));
+					if (!bWasWin)
+						bWasWin = CheckLine(TargetState, InIndex, FIntVector(0, NumToWin, -NumToWin));
+					
 
 					if (!bWasWin)
 					{
@@ -140,29 +144,27 @@ bool ATicTacGameStateBase::CheckLine(EElementState TargetState, FIntVector Initi
 	FIntVector LineStart	= UHelpersFuncLib::ClampVectorComponents(InitialPoint - DeltaVector, FIntVector(0,0,0), FieldSize-FIntVector(1,1,1));
 	FIntVector LineEnd		= UHelpersFuncLib::ClampVectorComponents(InitialPoint + DeltaVector, FIntVector(0,0,0), FieldSize-FIntVector(1,1,1));
 
-	for (int i = LineStart.X; i <= LineEnd.X; i++)
+	FIntVector Direction = LineEnd - LineStart;
+	int32 Length = FMath::FloorToInt(Direction.Size());
+	FIntVector StepVector = FIntVector(FMath::Sign(Direction.X), FMath::Sign(Direction.Y), FMath::Sign(Direction.Z));//FIntVector(Direction.X / Length, Direction.Y / Length, Direction.Z / Length);
+	//UE_LOG(LogTemp, Warning, TEXT("Direction size %f Length %f"), Direction.Size(), Length);
+	for (int step = 0; step <= FMath::RoundToInt(Direction.GetMax()); step++)
 	{
-		for (int j = LineStart.Y; j <= LineEnd.Y; j++)
+		auto Element = GameMode->GetBoardElement(LineStart + StepVector*step);
+		if (IsValid(Element))
 		{
-			for (int k = LineStart.Z; k <= LineEnd.Z; k++)
+			uint8 StateSuccess = Element->ElementState == TargetState;
+			if (StateSuccess)
 			{
-				auto Element = GameMode->GetBoardElement(FIntVector(i, j, k));
-				if (IsValid(Element))
+				CurrentNum++;
+				if (CurrentNum == NumToWin)
 				{
-					uint8 StateSuccess = Element->ElementState == TargetState;
-					if (StateSuccess)
-					{
-						CurrentNum++;
-						if (CurrentNum == NumToWin)
-						{
-							return true;
-						}
-					}
-					else
-					{
-						//CurrentNum = 0;
-					}
+					return true;
 				}
+			}
+			else
+			{
+				//CurrentNum = 0;
 			}
 		}
 	}
