@@ -82,52 +82,18 @@ void ATicTacGameStateBase::CheckWin()
 						if (EmptyElementsCount == 0)
 						{
 							UE_LOG(LogTemp, Warning, TEXT("Draw!"));
+							OnMatchEnd.Broadcast(EElementState::ES_None);
 						}
 					}
 					else
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Win!"));
+						OnMatchEnd.Broadcast(TargetState);
 					}
 				}
 			}
 		}
 	}
-}
-
-bool ATicTacGameStateBase::CheckPlane(FIntVector InitialPoint, FIntVector PlaneNormal, EElementState TargetState)
-{
-	if (IsValid(GetWorld()))
-	{
-		auto GameMode = Cast<ASuperTicTacGameModeBase>(GetWorld()->GetAuthGameMode());
-		if (IsValid(GameMode))
-		{
-			FIntVector FieldSize = GameMode->GameFieldSize;
-			uint8 NumToWin = GameMode->NumElementsToWin;
-
-			//Z is normal for plane
-			if (PlaneNormal == FIntVector(0, 0, 1))
-			{
-				for (int i = 0; i < FieldSize.X; i++)
-				{
-					uint8 bIsWin = CheckLine(TargetState, FIntVector(i, 0, InitialPoint.Z), FIntVector(i, FieldSize.Y, InitialPoint.Z));
-					if (bIsWin)
-					{
-						return true;
-					}
-				}
-				
-				for (int j = 0; j < FieldSize.Y; j++)
-				{
-					uint8 bIsWin = CheckLine(TargetState, FIntVector(0, j, InitialPoint.Z), FIntVector(FieldSize.X, j, InitialPoint.Z));
-					if (bIsWin)
-					{
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
 }
 
 bool ATicTacGameStateBase::CheckLine(EElementState TargetState, FIntVector InitialPoint, FIntVector DeltaVector)

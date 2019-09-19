@@ -7,6 +7,7 @@
 #include "GameBoardElementBase.h"
 #include "TicTacGameStateBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMatchEnd, EElementState, MatchResult);
 
 UCLASS()
 class SUPERTICTAC_API ATicTacGameStateBase : public AGameStateBase
@@ -16,6 +17,9 @@ class SUPERTICTAC_API ATicTacGameStateBase : public AGameStateBase
 public:
 	AGameBoardElementBase* LastChangedElement;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnMatchEnd OnMatchEnd;
+public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void StartMatch();
 
@@ -27,9 +31,6 @@ public:
 
 	UFUNCTION()
 	void CheckWin();
-
-	UFUNCTION()
-	bool CheckPlane(FIntVector InitialPoint, FIntVector PlaneNormal, EElementState TargetState);
 
 	UFUNCTION()
 	bool CheckLine(EElementState TargetState, FIntVector InitialPoint, FIntVector DeltaVector);
