@@ -9,7 +9,8 @@
 ASuperTicTacGameModeBase::ASuperTicTacGameModeBase() :
 	GameBoardElementSize(200.f),
 	GameFieldSize(3,3,3),
-	NumElementsToWin(3)
+	NumElementsToWin(3),
+	bIsBoardsCollapsed(false)
 {
 
 }
@@ -56,6 +57,8 @@ void ASuperTicTacGameModeBase::CreateGameField()
 			}
 			SpawnedGameBoards.Add(i, NewGameBoard);
 		}
+
+		//UnCollapseBoards();
 	}
 }
 
@@ -104,4 +107,42 @@ TArray<AGameBoardElementBase*> ASuperTicTacGameModeBase::GetAllElements() const
 	}
 	
 	return ResutArr;
+}
+
+void ASuperTicTacGameModeBase::UnCollapseBoards()
+{
+	if (SpawnedGameBoards.Num() == 3)
+	{
+		auto ZeroBoard = SpawnedGameBoards.FindRef(0);
+		if (IsValid(ZeroBoard))
+		{
+			ZeroBoard->MoveToTarget(FVector(0, GameFieldSize.Y*GameBoardElementSize, GameBoardElementSize));
+		}
+		auto SecondBoard = SpawnedGameBoards.FindRef(2);
+		if (IsValid(SecondBoard))
+		{
+			SecondBoard->MoveToTarget(FVector(0, -GameFieldSize.Y*GameBoardElementSize, GameBoardElementSize));
+		}
+
+		bIsBoardsCollapsed = false;
+	}
+}
+
+void ASuperTicTacGameModeBase::CollapseBoards()
+{
+	if (SpawnedGameBoards.Num() == 3)
+	{
+		auto ZeroBoard = SpawnedGameBoards.FindRef(0);
+		if (IsValid(ZeroBoard))
+		{
+			ZeroBoard->MoveToTarget(FVector(0, 0, 0));
+		}
+		auto SecondBoard = SpawnedGameBoards.FindRef(2);
+		if (IsValid(SecondBoard))
+		{
+			SecondBoard->MoveToTarget(FVector(0, 0, GameBoardElementSize*2));
+		}
+
+		bIsBoardsCollapsed = true;
+	}
 }

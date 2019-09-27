@@ -7,6 +7,7 @@
 #include "SuperTicTacGameModeBase.generated.h"
 
 class AGameBoardBase;
+class AGameBoardElementBase;
 
 UCLASS()
 class SUPERTICTAC_API ASuperTicTacGameModeBase : public AGameModeBase
@@ -29,15 +30,24 @@ public:
 	uint8 NumElementsToWin;
 
 	UPROPERTY(BlueprintReadOnly)
+	uint8 bIsBoardsCollapsed;
+
+	UPROPERTY(BlueprintReadOnly)
 	TMap<uint8, AGameBoardBase*> SpawnedGameBoards;
 
 	UFUNCTION(BlueprintCallable)
 	void CreateGameField();
 
 	UFUNCTION(BlueprintCallable)
-	class AGameBoardElementBase* GetBoardElement(FIntVector Index) const;
+	AGameBoardElementBase* GetBoardElement(FIntVector Index) const;
 	UFUNCTION(BlueprintCallable)
-	FIntVector GetBoardElementIndex(class AGameBoardElementBase* BoardElement, uint8 &bIsSuccess) const;
+	FIntVector GetBoardElementIndex(AGameBoardElementBase* BoardElement, uint8 &bIsSuccess) const;
 	UFUNCTION(BlueprintCallable)
 	TArray<AGameBoardElementBase*> GetAllElements() const;
+
+	UFUNCTION(BlueprintCallable)
+	void UnCollapseBoards();
+
+	UFUNCTION(BlueprintCallable)
+	void CollapseBoards();
 };

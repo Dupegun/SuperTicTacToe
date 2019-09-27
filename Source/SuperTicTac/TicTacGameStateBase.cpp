@@ -138,3 +138,17 @@ bool ATicTacGameStateBase::CheckLine(EElementState TargetState, FIntVector Initi
 	return false;
 
 }
+
+bool ATicTacGameStateBase::GetIsBoardsCollapsed() const
+{
+	if (ensure(GetWorld()))
+	{
+		auto GameMode = Cast<ASuperTicTacGameModeBase>(GetWorld()->GetAuthGameMode());
+		if (IsValid(GameMode))
+		{
+			return GameMode->bIsBoardsCollapsed;
+		}
+	}
+
+	return false;
+}

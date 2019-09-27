@@ -3,6 +3,7 @@
 #include "GameBoardBase.h"
 #include "GameBoardElementBase.h"
 #include "Engine/World.h"
+#include "Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 AGameBoardBase::AGameBoardBase() :
@@ -61,7 +62,7 @@ bool AGameBoardBase::FillBoardWithElements()
 				SpawnParams.Owner = this;
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 				auto SpawnedElement = GetWorld()->SpawnActor<AGameBoardElementBase>(BoardElementClass, SpawnTransform, SpawnParams);
-				SpawnedElement->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+				SpawnedElement->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 				BoardElements.Add(FIntVector(i, j, BoardIndex), SpawnedElement);
 			}
 		}
@@ -75,5 +76,13 @@ TArray<AGameBoardElementBase*> AGameBoardBase::GetAllElements() const
 	TArray<AGameBoardElementBase*> BoardElementsKeys;
 	BoardElements.GenerateValueArray(BoardElementsKeys);
 	return BoardElementsKeys;
+}
+
+void AGameBoardBase::MoveToTarget(FVector TargetLocation)
+{
+	FLatentActionInfo LatentInfo;
+	LatentInfo.CallbackTarget = this;
+	UKismetSystemLibrary::MoveComponentTo(GetRootComponent(), TargetLocation,
+		GetActorRotation(), true, false, 1.f, true, EMoveComponentAction::Type::Move, LatentInfo);
 }
 

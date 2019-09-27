@@ -34,4 +34,7 @@ public:
 
 	UFUNCTION()
 	bool CheckLine(EElementState TargetState, FIntVector InitialPoint, FIntVector DeltaVector);
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsBoardsCollapsed() const;
 };

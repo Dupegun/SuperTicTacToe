@@ -48,4 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<AGameBoardElementBase*> GetAllElements() const;
 
+	UFUNCTION(BlueprintCallable)
+	void MoveToTarget(FVector TargetLocation);
+
 };
